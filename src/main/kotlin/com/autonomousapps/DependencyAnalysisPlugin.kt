@@ -445,7 +445,7 @@ class DependencyAnalysisPlugin : Plugin<Project> {
       finalizedBy(failOrWarn)
 
       doLast {
-        logger.debug("Advice report (aggregated)  : ${adviceReport.get().projectReport.get().asFile.path}")
+        logger.debug("Advice report (aggregated): ${adviceReport.get().projectReport.get().asFile.path}")
       }
     }
 
@@ -463,7 +463,8 @@ class DependencyAnalysisPlugin : Plugin<Project> {
    */
 
   /**
-   * Tasks are registered here. This function is called in a loop, once for each Android variant or Java source set.
+   * Tasks are registered here. This function is called in a loop, once for each Android variant or
+   * Java source set.
    */
   private fun <T : ClassAnalysisTask> Project.analyzeDependencies(
     dependencyAnalyzer: DependencyAnalyzer<T>
