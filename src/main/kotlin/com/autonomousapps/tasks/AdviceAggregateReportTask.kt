@@ -36,6 +36,7 @@ abstract class AdviceAggregateReportTask : DefaultTask() {
 
     val comprehensiveAdvice: Map<String, Set<ComprehensiveAdvice>> =
       adviceAllReports.dependencies.map { dependency ->
+        logger.quiet("agg dep type=${dependency.javaClass.canonicalName}")
         val path = (dependency as ProjectDependency).dependencyProject.path
 
         val compAdvice: Set<ComprehensiveAdvice> = adviceAllReports.fileCollection(dependency)
