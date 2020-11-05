@@ -59,7 +59,7 @@ val antlrVersion by extra("4.8")
 val internalAntlrVersion by extra("$antlrVersion.2")
 
 dependencies {
-  implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+  implementation(enforcedPlatform("org.jetbrains.kotlin:kotlin-bom"))
 
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
   implementation("com.squareup.moshi:moshi:1.9.2") {
@@ -78,7 +78,9 @@ dependencies {
     because("High performance, concurrent cache")
   }
   implementation(files("libs/asm-$asmVersion.jar"))
-  implementation(files("libs/antlr-$internalAntlrVersion.jar"))
+//  implementation(files("libs/antlr-$internalAntlrVersion.jar"))
+  implementation(project(path = ":antlr", configuration = "shadow"))
+  //  compile project(path: ':api', configuration: 'shadow')
 
   compileOnly("com.android.tools.build:gradle:4.0.1") {
     because("Auto-wiring into Android projects")
@@ -117,7 +119,7 @@ dependencies {
 tasks.jar {
   // Bundle shaded jars into final artifact
   from(zipTree("libs/asm-$asmVersion.jar"))
-  from(zipTree("libs/antlr-$internalAntlrVersion.jar"))
+//  from(zipTree("libs/antlr-$internalAntlrVersion.jar"))
 }
 
 gradlePlugin.testSourceSets(functionalTestSourceSet, smokeTestSourceSet)

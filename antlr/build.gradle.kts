@@ -5,8 +5,9 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocatio
 plugins {
   `java-library`
   antlr
-  id("com.github.johnrengelman.shadow") version "5.2.0"
+  id("com.github.johnrengelman.shadow") version "6.1.0"
   `maven-publish`
+  signing
   groovy
 }
 
@@ -17,6 +18,8 @@ repositories {
 group = "com.autonomousapps"
 val antlrVersion: String by rootProject.extra // e.g., 4.8
 val internalAntlrVersion: String by rootProject.extra // e.g., 4.8.0
+val VERSION_GRAMMAR: String by project
+version = VERSION_GRAMMAR
 
 java {
   sourceCompatibility = JavaVersion.VERSION_1_8
@@ -45,25 +48,6 @@ tasks.generateGrammarSource {
   )
 }
 
-// Publish with `./gradlew antlr:publishShadowPublicationToMavenRepository`
-publishing {
-  publications {
-    create<MavenPublication>("shadow") {
-      groupId = "autonomousapps"
-      artifactId = "antlr"
-      version = internalAntlrVersion
-
-      //from components.java
-      project.shadow.component(this)
-    }
-  }
-  repositories {
-    maven {
-      url = uri("$buildDir/repo")
-    }
-  }
-}
-
 dependencies {
   antlr("org.antlr:antlr4:$antlrVersion")
   implementation("org.antlr:antlr4-runtime:$antlrVersion")
@@ -74,6 +58,73 @@ dependencies {
   }
   testImplementation("com.google.truth:truth:1.0.1") {
     because("Groovy's == behavior on Comparable classes is beyond stupid")
+  }
+}
+
+// Publish with `./gradlew antlr:publishShadowPublicationToMavenRepository`
+publishing {
+  publications {
+    create<MavenPublication>("shadow") {
+      groupId = "com.autonomousapps"
+      artifactId = "simple-grammar"
+//      version = internalAntlrVersion
+
+      from(components["java"])
+//      project.shadow.component(this)
+
+      configurePom(pom)
+      signing.sign(this)
+
+      versionMapping {
+        usage("java-api") {
+          fromResolutionOf("runtimeClasspath")
+        }
+        usage("java-runtime") {
+          fromResolutionResult()
+        }
+      }
+    }
+  }
+  repositories {
+    maven {
+      url = uri("$buildDir/repo")
+    }
+  }
+}
+
+fun configurePom(pom: org.gradle.api.publish.maven.MavenPom) {
+  pom.apply {
+    name.set("Java/Kotlin Simple Grammar")
+    description.set("A simple grammar for Java and Kotlin source")
+    url.set("https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin")
+    inceptionYear.set("2020")
+    licenses {
+      license {
+        name.set("The Apache License, Version 2.0")
+        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+      }
+    }
+    developers {
+      developer {
+        id.set("autonomousapps")
+        name.set("Tony Robalik")
+      }
+    }
+    scm {
+      connection.set("scm:git:git://github.com/autonomousapps/dependency-analysis-android-gradle-plugin.git")
+      developerConnection.set("scm:git:ssh://github.com/autonomousapps/dependency-analysis-android-gradle-plugin.git")
+      url.set("https://github.com/autonomousapps/dependency-analysis-android-gradle-plugin")
+    }
+  }
+}
+
+tasks.withType<Sign>().configureEach {
+//  onlyIf {
+//    val isNotSnapshot = !internalAntlrVersion.endsWith("SNAPSHOT")
+//    isNotSnapshot && gradle.taskGraph.hasTask(publishToMavenCentral.get())
+//  }
+  doFirst {
+    logger.quiet("Signing v$internalAntlrVersion")
   }
 }
 
