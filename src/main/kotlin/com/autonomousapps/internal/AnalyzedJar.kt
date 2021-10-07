@@ -78,11 +78,8 @@ internal class AnalyzedJar(
           if (!isNamespaceClass(analyzedClass, analyzedClasses)) {
             // it's ok if it is not a namespace class, if it's private (non-public)
             if (isPublic(analyzedClass)) {
-              // it's ok if it's public, if it's an enum
-              if (!isEnum(analyzedClass)) {
-                value = false
-                break
-              }
+              value = false
+              break
             }
           }
         }
@@ -109,6 +106,4 @@ internal class AnalyzedJar(
 
   private fun isPublic(analyzedClass: AnalyzedClass): Boolean =
     analyzedClass.access == Access.PUBLIC || analyzedClass.access == Access.PROTECTED
-
-  private fun isEnum(analyzedClass: AnalyzedClass): Boolean = analyzedClass.superClassName == "java/lang/Enum"
 }
